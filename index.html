@@ -76,6 +76,30 @@
             margin-top: 4px;
             margin-bottom: 2px;
             transition: 300ms all;
+            background-color: #333;
+        }
+
+        .oyuncu img.error {
+            display: none;
+        }
+
+        .oyuncu .avatar-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            margin-right: 10px;
+            margin-left: 5px;
+            margin-top: 4px;
+            margin-bottom: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
         }
 
         .arama-alani {
@@ -118,6 +142,14 @@
             text-decoration: none;
             font-weight: bold;
             margin-top: 2px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .oyuncu-link:hover {
+            background-color: rgba(36, 204, 255, 0.2);
         }
 
         #searchInput {
@@ -462,6 +494,25 @@
             document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
         }
 
+        // Safe link opening function
+        function openLink(url) {
+            // Method 1: Create a temporary link and click it
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Generate avatar placeholder with initials
+        function getAvatarPlaceholder(nick) {
+            if (!nick) return '?';
+            const initials = nick.split(' ').map(word => word.charAt(0)).join('').substring(0, 2);
+            return initials || nick.charAt(0);
+        }
+
         window.lang = window.location.href.indexOf("&lang=") != -1 ? window.location.href.split("&lang=")[1] : safeStorage.getItem('selectedLanguage') || '8';
 
         // Set the language dropdown to the current language
@@ -511,27 +562,36 @@
             filteredPlayers.forEach(oyuncu => {
                 const isFavori = favoriler.includes(oyuncu.id);
                 const trans = window.currentTranslations || translations['8'];
-                const oyuncuDivi = `
-                    <div class="oyuncu ${isFavori ? 'favori' : ''}" data-id="${oyuncu.id}">
-                        <div class="gg-heart ${isFavori ? 'activex' : ''}"></div>
-                        <a href="${oyuncu.foto || 'https://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
-                            <img src="${oyuncu.foto || 'https://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
-                        </a>
-                        <div class="oyuncu-text">
-                            <b>${oyuncu.nick}</b>
-                            <i>ID: ${oyuncu.id}</i>
-                            <span>${trans.room}: ${oyuncu.odasi.slice(18)}</span>
-                            <div class="linkler">
-                                <a target="_blank" class="oyuncu-link" href="${oyuncu.odasi}">${trans.enter}</a>
-                                <a target="_blank" class="oyuncu-link" href="${oyuncu.odasi}/viewer">${trans.watch}</a>
-                            </div>
+                
+                // Generate avatar placeholder
+                const avatarPlaceholder = getAvatarPlaceholder(oyuncu.nick);
+                const avatarUrl = oyuncu.foto || `https://gartic.io/static/images/avatar/svg/${oyuncu.avatar}.svg`;
+                
+                const oyuncuDivi = document.createElement('div');
+                oyuncuDivi.className = `oyuncu ${isFavori ? 'favori' : ''}`;
+                oyuncuDivi.setAttribute('data-id', oyuncu.id);
+                
+                oyuncuDivi.innerHTML = `
+                    <div class="gg-heart ${isFavori ? 'activex' : ''}"></div>
+                    <img src="${avatarUrl}" alt="${oyuncu.nick}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="avatar-placeholder">${avatarPlaceholder}</div>
+                    <div class="oyuncu-text">
+                        <b>${oyuncu.nick}</b>
+                        <i>ID: ${oyuncu.id}</i>
+                        <span>${trans.room}: ${oyuncu.odasi.slice(18)}</span>
+                        <div class="linkler">
+                            <span class="oyuncu-link" onclick="openLink('${oyuncu.odasi}')">${trans.enter}</span>
+                            <span class="oyuncu-link" onclick="openLink('${oyuncu.odasi}/viewer')">${trans.watch}</span>
                         </div>
-                    </div>`;
-                document.querySelector(".kullanicilar").innerHTML += oyuncuDivi;
+                    </div>
+                `;
+                
+                document.querySelector(".kullanicilar").appendChild(oyuncuDivi);
             });
 
             document.getElementById("online").querySelector("b").textContent = filteredPlayers.length;
 
+            // Add heart click handlers
             document.querySelectorAll('.gg-heart').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const oyuncuDiv = e.target.closest('.oyuncu');
