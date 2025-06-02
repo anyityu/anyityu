@@ -514,8 +514,8 @@
                 const oyuncuDivi = `
                     <div class="oyuncu ${isFavori ? 'favori' : ''}" data-id="${oyuncu.id}">
                         <div class="gg-heart ${isFavori ? 'activex' : ''}"></div>
-                        <a href="${oyuncu.foto || 'http://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
-                            <img src="${oyuncu.foto || 'http://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
+                        <a href="${oyuncu.foto || 'https://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
+                            <img src="${oyuncu.foto || 'https://gartic.io/static/images/avatar/svg/' + oyuncu.avatar + '.svg'}">
                         </a>
                         <div class="oyuncu-text">
                             <b>${oyuncu.nick}</b>
@@ -564,7 +564,7 @@
                                 "zafer": oyuncu.vitorias,
                                 "id": oyuncu.id.toString(),
                                 "avatar": oyuncu.avatar,
-                                "odasi": `http://gartic.io/${odaKodu}`,
+                                "odasi": `https://gartic.io/${odaKodu}`,
                                 "nick": oyuncu.nick,
                                 "foto": oyuncu.foto
                             });
