@@ -3,762 +3,1344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHOWHERE Gartic.io</title>
+    <title>WHOWHERE Gartic.io - Modern</title>
     <style>
+        :root {
+            --primary-bg: #111620;
+            --secondary-bg: #19233491;
+            --hover-bg: #31528bcf;
+            --primary-color: #24ccff;
+            --accent-color: #FF3366;
+            --text-color: #ffffff;
+            --border-color: #555;
+            --border-hover: #c4c4c4;
+            --button-bg: #2551a2;
+            --input-bg: #3d2aa3;
+            --input-border: #405d60;
+            --filter-border: #2c279a;
+            --gradient-start: rgba(17, 22, 32, 1);
+            --gradient-end: rgba(38, 55, 89, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background: #111620;
-            color: white;
-            font-family: Arial, sans-serif;
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             -webkit-font-smoothing: antialiased;
-            background: rgb(17, 22, 32);
-            background: linear-gradient(177deg, rgba(17, 22, 32, 1) 24%, rgba(38, 55, 89, 1) 82%);
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(177deg, var(--gradient-start) 24%, var(--gradient-end) 82%);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .kullanicilar-container {
+        .app-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            overflow-y: auto;
+            min-height: 100vh;
             padding: 15px;
         }
 
-        .search-input {
-            margin: 10px;
-            padding: 10px;
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .gartic-logo {
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 700;
+            background: linear-gradient(to right, hsl(320.6, 100%, 56.1%), hsl(204 100% 59%));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .online-counter {
             font-size: 18px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 500px;
+            opacity: 0.9;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .kullanicilar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            width: 100%;
-            gap: 8px;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
         }
 
-        .oyuncu {
-            border: 1px solid #555;
-            display: flex;
-            align-items: center;
-            background-color: #19233491;
-            color: white;
-            flex: 1 1 calc(25% - 20px);
-            box-sizing: border-box;
-            max-width: 200px;
-            transition: 300ms all;
+        .alert-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
             position: relative;
-            border-radius: 5px 18px 5px 5px;
+            font-weight: 500;
         }
 
-        .oyuncu:hover {
-            background-color: #31528bcf;
-            border: 1px solid #c4c4c4;
-            transition: 300ms all;
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        .oyuncu img {
+        .alert-error {
+            background: linear-gradient(135deg, #ff3366, #ff5580);
+            border-left: 4px solid #ff1144;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #00d4aa, #00b894);
+            border-left: 4px solid #00a884;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #24ccff, #0099dd);
+            border-left: 4px solid #0077bb;
+        }
+
+        .controls-section {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 25px;
+        }
+
+        .language-selector {
+            margin-bottom: 15px;
+        }
+
+        .language-dropdown {
+            width: 100%;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown:hover,
+        .language-dropdown:focus {
+            background: #4d3ab3;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(36, 204, 255, 0.2);
+        }
+
+        .search-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(36, 204, 255, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .refresh-button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            min-width: 50px;
+        }
+
+        .refresh-button:hover {
+            background: #3561b2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 81, 162, 0.4);
+        }
+
+        .refresh-button:active {
+            transform: translateY(0);
+        }
+
+        .refresh-button.loading {
+            animation: rotate 1s linear infinite;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .filter-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .filter-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 2px solid var(--filter-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-label:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .filter-label.active {
+            background: var(--button-bg);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(36, 204, 255, 0.3);
+        }
+
+        .filter-label input {
+            display: none;
+        }
+
+        .filter-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .filter-label:hover::before {
+            left: 100%;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .player-card {
+            background: var(--secondary-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-card:hover {
+            background: var(--hover-bg);
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .player-card.favorite {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.2);
+        }
+
+        .player-avatar-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .player-avatar {
             width: 60px;
             height: 60px;
+            border-radius: 50%;
             object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            margin-right: 10px;
-            margin-left: 5px;
-            margin-top: 4px;
-            margin-bottom: 2px;
-            transition: 300ms all;
-            background-color: #333;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            background: var(--primary-bg);
+            transition: all 0.3s ease;
         }
 
-        .oyuncu img.error {
-            display: none;
+        .player-card:hover .player-avatar {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
         }
 
-        .oyuncu .avatar-placeholder {
+        .avatar-placeholder {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            border: 2px solid #ddd;
-            margin-right: 10px;
-            margin-left: 5px;
-            margin-top: 4px;
-            margin-bottom: 2px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 700;
             color: white;
             text-transform: uppercase;
+            border: 3px solid rgba(255, 255, 255, 0.2);
         }
 
-        .arama-alani {
-            display: flex;
-        }
-
-        .oyuncu-text {
-            display: flex;
-            flex-direction: column;
+        .player-info {
             flex: 1;
             overflow: hidden;
         }
 
-        .oyuncu b,
-        .oyuncu i,
-        .oyuncu span {
-            display: block;
+        .player-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            font-size: 13px;
-            margin-top: 2px;
-            margin-bottom: 2px;
         }
 
-        .oyuncu i {
+        .player-id {
             font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 4px;
         }
 
-        .linkler {
+        .player-room {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .player-actions {
             display: flex;
-            gap: 10px;
-            align-items: center;
-            font-size: 12px;
-            font-weight: normal;
+            gap: 8px;
         }
 
-        .oyuncu-link {
-            color: #24ccff;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 2px;
+        .action-button {
+            padding: 6px 12px;
+            background: rgba(36, 204, 255, 0.2);
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            padding: 2px 4px;
-            border-radius: 3px;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .oyuncu-link:hover {
-            background-color: rgba(36, 204, 255, 0.2);
+        .action-button:hover {
+            background: var(--primary-color);
+            color: var(--primary-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(36, 204, 255, 0.4);
         }
 
-        #searchInput {
-            background: #3d2aa3;
-            border: solid 1px #405d60;
-            color: #fff;
-            outline: none;
+        .favorite-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
             display: flex;
-            margin-top: 5px;
-            padding: 10px;
-            max-width: 280px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .gartic_filter {
+        .favorite-button:hover {
+            background: rgba(255, 51, 102, 0.2);
+            border-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .favorite-button.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .favorite-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .favorite-button.active .favorite-icon,
+        .favorite-button:hover .favorite-icon {
+            color: white;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            margin-top: 5px;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
-        .gartic_filter label {
-            border: solid 1px #2c279a;
-            border-radius: 5px;
-            padding: 8px 8px;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .gartic_filter label:has(input[type="checkbox"]:checked) {
-            background-color: #2551a2;
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .gartic_logo {
-            font-size: 18px;
-            background: linear-gradient( to right, hsl(320.6, 100%, 56.1%), hsl(204 100% 59%));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         @media (max-width: 768px) {
-            .oyuncu {
-                flex: 1 1 calc(50% - 20px);
-            }
-            .gartic_filter {
-                padding: 0px 10px;
-                flex-wrap: wrap;
-                justify-content: space-around;
-                gap: 8px;
-            }
-
-            .gartic_filter label {
-                flex: 1 1 38%;
-                text-align: center;
+            .players-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 10px;
             }
             
-            .language-dropdown {
-                min-width: 150px;
+            .filter-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .player-card {
+                padding: 12px;
+            }
+            
+            .player-avatar,
+            .avatar-placeholder {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .player-name {
                 font-size: 14px;
+            }
+            
+            .action-button {
+                padding: 5px 10px;
+                font-size: 11px;
             }
         }
 
         @media (max-width: 480px) {
-            .oyuncu {
-                flex: 1 1 100%;
-                max-width: 46%;
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-section {
+                flex-direction: column;
+            }
+            
+            .refresh-button {
+                width: 100%;
             }
         }
 
-        #yenile {
-            background: #2551a2;
-            color: #fff;
-            margin-top: 5px;
-            padding: 10px 15px;
-            height: 46px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.5;
         }
 
-        .gg-redo {
-            box-sizing: border-box;
-            position: relative;
-            display: block;
-            transform: scale(var(--ggs, 1.3));
-            width: 14px;
-            height: 14px;
-            border: 2px solid;
-            border-right-color: transparent;
-            border-radius: 100px
-        }
-        .gg-redo::before {
-            content: "";
-            display: block;
-            box-sizing: border-box;
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-top: 2px solid;
-            border-right: 2px solid;
-            top: -3px;
-            right: -1px;
-            transform: rotate(68deg)
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
         }
 
-        .gg-heart,
-        .gg-heart::after {
-            cursor: pointer;
-            border: 2px solid;
-            border-top-left-radius: 100px;
-            border-top-right-radius: 100px;
-            width: 10px;
+        .empty-state-text {
+            font-size: 18px;
+        }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            max-width: 300px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .debug-title {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .debug-item {
+            margin: 5px 0;
+            opacity: 0.8;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .status-dot {
+            width: 8px;
             height: 8px;
-            border-bottom: 0
-        }
-        .gg-heart {
-            box-sizing: border-box;
-            transform: translate( calc(-10px / 2 * var(--ggs, 1)),
-            calc(-6px / 2 * var(--ggs, 1))) rotate(-45deg) scale(var(--ggs, 1.3));
-            display: block;
-            top: -3px;
-            right: -3px;
-            position: absolute;
-            color: #e6e6e6;
-        }
-        .gg-heart::after,
-        .gg-heart::before {
-            content: "";
-            display: block;
-            box-sizing: border-box;
-            position: absolute
-        }
-        .gg-heart::after {
-            right: -9px;
-            transform: rotate(90deg);
-            top: 5px
-        }
-        .gg-heart::before {
-            width: 11px;
-            height: 11px;
-            border-left: 2px solid;
-            border-bottom: 2px solid;
-            left: -2px;
-            top: 3px
+            border-radius: 50%;
+            background: #00d4aa;
+            animation: blink 2s infinite;
         }
 
-        .gg-heart.activex {
-            color: #FF3366;
-            border-color: #FF3366;
-            background: #FF9CB5;
+        .status-dot.error {
+            background: var(--accent-color);
         }
 
-        .gg-heart.activex::after,
-        .gg-heart.activex::before {
-            color: #FF3366;
-            background: #FF3366;
-            border-color: #FF3366;
-        }
-
-        .gg-heart:hover {
-            color: #FF3366;
-            background: #FF3366;
-            border-color: #FF3366;
-        }
-
-        .gg-heart:hover::after,
-        .gg-heart:hover::before {
-            color: #FF3366;
-            background: #FF3366;
-            border-color: #FF3366;
-        }
-
-        .error-message {
-            background: #ff3366;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px;
-            text-align: center;
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            color: #24ccff;
-            margin: 20px;
-            display: none;
-        }
-
-        .language-selector {
-            margin: 10px 0;
-            text-align: center;
-        }
-
-        .language-dropdown {
-            background: #3d2aa3;
-            border: solid 1px #405d60;
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            outline: none;
-            min-width: 200px;
-        }
-
-        .language-dropdown:hover {
-            background: #4d3ab3;
-        }
-
-        .language-dropdown option {
-            background: #2a1d5a;
-            color: #fff;
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
-    <div class="kullanicilar-container">
-        <h1 class="gartic_logo">Gartic WHOWHERE <span id="online">Online: <b>0</b><span></h1>
-        <div class="error-message" id="errorMessage"></div>
-        <div class="loading" id="loadingMessage">Yükleniyor...</div>
-        <div class="language-selector">
-            <select id="languageSelect" class="language-dropdown">
-                <option value="0">🇺🇸 English</option>
-                <option value="1">🇵🇹 Português</option>
-                <option value="2">🇪🇸 Español</option>
-                <option value="3">🇫🇷 Français</option>
-                <option value="4">🇩🇪 Deutsch</option>
-                <option value="5">🇮🇹 Italiano</option>
-                <option value="6">🇷🇺 Русский</option>
-                <option value="7">🇵🇱 Polski</option>
-                <option value="8">🇹🇷 Türkçe</option>
-                <option value="9">🇳🇱 Nederlands</option>
-                <option value="10">🇯🇵 日本語</option>
-                <option value="11">🇨🇳 中文</option>
-                <option value="12">🇰🇷 한국어</option>
-                <option value="13">🇮🇩 Indonesia</option>
-                <option value="14">🇵🇭 Filipino</option>
-                <option value="15">🇮🇳 हिन्दी</option>
-                <option value="16">🇸🇪 Svenska</option>
-                <option value="17">🇨🇿 Čeština</option>
-                <option value="18">🇭🇺 Magyar</option>
-                <option value="19">🇷🇴 Română</option>
-                <option value="20">🇧🇬 Български</option>
-                <option value="21">🇦🇪 العربية</option>
-            </select>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="gartic-logo">Gartic WHOWHERE</h1>
+            <div class="online-counter">
+                Online: <span id="onlineCount">0</span> oyuncu
+            </div>
+            <div class="connection-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="connectionText">Bağlanıyor...</span>
+            </div>
+        </header>
+
+        <div class="alert-container" id="alertContainer"></div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-value" id="totalPlayers">0</div>
+                <div class="stat-label">Toplam Oyuncu</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalRooms">0</div>
+                <div class="stat-label">Aktif Oda</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="favoriteCount">0</div>
+                <div class="stat-label">Favori</div>
+            </div>
         </div>
-        <div class="arama-alani">
-            <input type="text" id="searchInput" placeholder="Kullanıcı ara" class="search-input">
-            <button id="yenile"><i class="gg-redo"></i></button>
+
+        <div class="controls-section">
+            <div class="language-selector">
+                <select id="languageSelect" class="language-dropdown">
+                    <option value="0">🇺🇸 English</option>
+                    <option value="1">🇵🇹 Português</option>
+                    <option value="2">🇪🇸 Español</option>
+                    <option value="3">🇫🇷 Français</option>
+                    <option value="4">🇩🇪 Deutsch</option>
+                    <option value="5">🇮🇹 Italiano</option>
+                    <option value="6">🇷🇺 Русский</option>
+                    <option value="7">🇵🇱 Polski</option>
+                    <option value="8">🇹🇷 Türkçe</option>
+                    <option value="9">🇳🇱 Nederlands</option>
+                    <option value="10">🇯🇵 日本語</option>
+                    <option value="11">🇨🇳 中文</option>
+                    <option value="12">🇰🇷 한국어</option>
+                    <option value="13">🇮🇩 Indonesia</option>
+                    <option value="14">🇵🇭 Filipino</option>
+                    <option value="15">🇮🇳 हिन्दी</option>
+                    <option value="16">🇸🇪 Svenska</option>
+                    <option value="17">🇨🇿 Čeština</option>
+                    <option value="18">🇭🇺 Magyar</option>
+                    <option value="19">🇷🇴 Română</option>
+                    <option value="20">🇧🇬 Български</option>
+                    <option value="21">🇦🇪 العربية</option>
+                </select>
+            </div>
+
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="Kullanıcı ara..." autocomplete="off">
+                <button id="refreshButton" class="refresh-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="filter-section">
+                <label class="filter-label" for="withPhoto">
+                    <input type="checkbox" id="withPhoto">
+                    <span>📷 Fotoğraflı</span>
+                </label>
+                <label class="filter-label" for="withoutPhoto">
+                    <input type="checkbox" id="withoutPhoto">
+                    <span>👤 Fotoğrafsız</span>
+                </label>
+                <label class="filter-label" for="hideUsers">
+                    <input type="checkbox" id="hideUsers">
+                    <span>🚫 User Gizle</span>
+                </label>
+                <label class="filter-label" for="showFavorites">
+                    <input type="checkbox" id="showFavorites">
+                    <span>⭐ Favoriler</span>
+                </label>
+            </div>
         </div>
-        <div class="gartic_filter">
-            <label for="fotografli">
-                <input type="checkbox" id="fotografli"> Fotoğraflı
-            </label>
-            <label for="fotografsiz">
-                <input type="checkbox" id="fotografsiz"> Fotoğrafsız
-            </label>
-            <label for="userlar">
-                <input type="checkbox" id="userlar"> User Gizle
-            </label>
-            <label for="favoriler">
-                <input type="checkbox" id="favoriler"> Favoriler
-            </label>
+
+        <div class="players-grid" id="playersGrid"></div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🎮</div>
+            <div class="empty-state-text">Oyuncu bulunamadı</div>
         </div>
-        <div class="kullanicilar"></div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-title">Debug Bilgileri</div>
+        <div class="debug-item">WebSocket: <span id="wsStatus">-</span></div>
+        <div class="debug-item">Bağlantılar: <span id="wsConnections">0</span></div>
+        <div class="debug-item">Toplanan: <span id="collectedPlayers">0</span></div>
+        <div class="debug-item">Hata: <span id="errorCount">0</span></div>
     </div>
 
     <script>
-        // Create a safe storage wrapper that falls back to memory storage if localStorage is not available
-        const safeStorage = {
-            _memoryStorage: {},
-            _isAvailable: false,
-            
-            init: function() {
+        // Modern Gartic WHOWHERE Application
+        class GarticWhoWhere {
+            constructor() {
+                this.players = new Map();
+                this.rooms = new Map();
+                this.favorites = new Set();
+                this.filters = {
+                    withPhoto: false,
+                    withoutPhoto: false,
+                    hideUsers: false,
+                    showFavorites: false
+                };
+                this.language = '8';
+                this.searchTerm = '';
+                this.wsConnections = [];
+                this.debugMode = false;
+                this.errorCount = 0;
+                this.connectionRetries = 0;
+                this.maxRetries = 3;
+                
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                this.loadSettings();
+                this.initializeEventListeners();
+                this.updateUI();
+                this.loadRooms();
+                
+                // Debug mode toggle
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                        this.toggleDebugMode();
+                    }
+                });
+            }
+
+            loadSettings() {
                 try {
-                    const testKey = '__test__';
-                    localStorage.setItem(testKey, '1');
-                    localStorage.removeItem(testKey);
-                    this._isAvailable = true;
-                } catch (e) {
-                    this._isAvailable = false;
-                }
-            },
-            
-            getItem: function(key) {
-                if (this._isAvailable) {
-                    try {
-                        return localStorage.getItem(key);
-                    } catch (e) {
-                        return this._memoryStorage[key] || null;
+                    // Language
+                    const savedLanguage = this.getStorage('selectedLanguage');
+                    this.language = savedLanguage || '8';
+                    document.getElementById('languageSelect').value = this.language;
+                    
+                    // Favorites
+                    const savedFavorites = this.getStorage('favorites');
+                    if (savedFavorites) {
+                        this.favorites = new Set(JSON.parse(savedFavorites));
                     }
-                } else {
-                    return this._memoryStorage[key] || null;
-                }
-            },
-            
-            setItem: function(key, value) {
-                if (this._isAvailable) {
-                    try {
-                        localStorage.setItem(key, value);
-                    } catch (e) {
-                        this._memoryStorage[key] = value;
-                    }
-                } else {
-                    this._memoryStorage[key] = value;
+                    
+                    // Filters
+                    Object.keys(this.filters).forEach(filter => {
+                        const saved = this.getStorage(`filter_${filter}`);
+                        if (saved !== null) {
+                            this.filters[filter] = saved === 'true';
+                            const element = document.getElementById(this.getFilterElementId(filter));
+                            if (element) {
+                                element.checked = this.filters[filter];
+                                element.closest('.filter-label').classList.toggle('active', this.filters[filter]);
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading settings:', error);
                 }
             }
-        };
-        
-        // Initialize storage
-        safeStorage.init();
 
-        // CORS Proxy configuration - You can change this to any CORS proxy service
-        const CORS_PROXIES = [
-            'https://corsproxy.io/?',
-            'https://api.allorigins.win/raw?url=',
-            'https://cors-anywhere.herokuapp.com/'
-        ];
-        
-        let currentProxyIndex = 0;
-        
-        function getCorsProxyUrl(url) {
-            return CORS_PROXIES[currentProxyIndex] + encodeURIComponent(url);
-        }
-        
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
-            setTimeout(() => {
-                errorEl.style.display = 'none';
-            }, 5000);
-        }
-        
-        function showLoading(show) {
-            document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
-        }
+            getFilterElementId(filter) {
+                const mapping = {
+                    withPhoto: 'withPhoto',
+                    withoutPhoto: 'withoutPhoto',
+                    hideUsers: 'hideUsers',
+                    showFavorites: 'showFavorites'
+                };
+                return mapping[filter];
+            }
 
-        // Safe link opening function
-        function openLink(url) {
-            // Method 1: Create a temporary link and click it
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+            initializeEventListeners() {
+                // Search
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value.toLowerCase();
+                    this.renderPlayers();
+                });
 
-        // Generate avatar placeholder with initials
-        function getAvatarPlaceholder(nick) {
-            if (!nick) return '?';
-            const initials = nick.split(' ').map(word => word.charAt(0)).join('').substring(0, 2);
-            return initials || nick.charAt(0);
-        }
+                // Refresh
+                document.getElementById('refreshButton').addEventListener('click', () => {
+                    this.loadRooms();
+                });
 
-        window.lang = window.location.href.indexOf("&lang=") != -1 ? window.location.href.split("&lang=")[1] : safeStorage.getItem('selectedLanguage') || '8';
+                // Language
+                document.getElementById('languageSelect').addEventListener('change', (e) => {
+                    this.language = e.target.value;
+                    this.setStorage('selectedLanguage', this.language);
+                    this.updateUILanguage();
+                    this.loadRooms();
+                });
 
-        // Set the language dropdown to the current language
-        document.getElementById('languageSelect').value = window.lang;
+                // Filters
+                document.querySelectorAll('.filter-label input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const filterName = this.getFilterNameFromId(e.target.id);
+                        this.filters[filterName] = e.target.checked;
+                        this.setStorage(`filter_${filterName}`, e.target.checked);
+                        e.target.closest('.filter-label').classList.toggle('active', e.target.checked);
+                        this.renderPlayers();
+                    });
+                });
+            }
 
-        let favoriler = [];
-        try {
-            const storedFavoriler = safeStorage.getItem('favoriler');
-            favoriler = storedFavoriler ? JSON.parse(storedFavoriler) : [];
-        } catch (e) {
-            favoriler = [];
-        }
-        
-        let oyuncular = [];
-        let filtreler = {
-            fotografli: safeStorage.getItem('fotografli') === 'true',
-            fotografsiz: safeStorage.getItem('fotografsiz') === 'true',
-            userlar: safeStorage.getItem('userlar') === 'true',
-            favoriler: safeStorage.getItem('favorilerGoster') === 'true'
-        };
+            getFilterNameFromId(id) {
+                const mapping = {
+                    'withPhoto': 'withPhoto',
+                    'withoutPhoto': 'withoutPhoto',
+                    'hideUsers': 'hideUsers',
+                    'showFavorites': 'showFavorites'
+                };
+                return mapping[id];
+            }
 
-        document.getElementById('fotografli').checked = filtreler.fotografli;
-        document.getElementById('fotografsiz').checked = filtreler.fotografsiz;
-        document.getElementById('userlar').checked = filtreler.userlar;
-        document.getElementById('favoriler').checked = filtreler.favoriler;
-
-        function kullanicilariGuncelle() {
-            const searchValue = document.getElementById("searchInput").value.toLowerCase();
-            document.querySelector(".kullanicilar").innerHTML = "";
-            let filteredPlayers = oyuncular.filter(oyuncu => {
-                if (filtreler.fotografli && !oyuncu.foto) return false;
-                if (filtreler.fotografsiz && oyuncu.foto) return false;
-                if (filtreler.userlar && oyuncu.nick.toLowerCase().includes('user')) return false;
-                if (filtreler.favoriler && !favoriler.includes(oyuncu.id)) return false;
-                if (!oyuncu.nick.toLowerCase().includes(searchValue)) return false;
-                return true;
-            });
-
-            filteredPlayers.sort((a, b) => {
-                const aFavori = favoriler.includes(a.id);
-                const bFavori = favoriler.includes(b.id);
-                if (aFavori && !bFavori) return -1;
-                if (!aFavori && bFavori) return 1;
-                return 0;
-            });
-
-            filteredPlayers.forEach(oyuncu => {
-                const isFavori = favoriler.includes(oyuncu.id);
-                const trans = window.currentTranslations || translations['8'];
+            async loadRooms() {
+                this.showLoading(true);
+                this.showAlert('info', 'Odalar yükleniyor...');
+                this.updateConnectionStatus('loading');
                 
-                // Generate avatar placeholder
-                const avatarPlaceholder = getAvatarPlaceholder(oyuncu.nick);
-                const avatarUrl = oyuncu.foto || `https://gartic.io/static/images/avatar/svg/${oyuncu.avatar}.svg`;
+                // Clear previous data
+                this.closeAllConnections();
+                this.players.clear();
+                this.rooms.clear();
+                this.errorCount = 0;
+                this.connectionRetries = 0;
                 
-                const oyuncuDivi = document.createElement('div');
-                oyuncuDivi.className = `oyuncu ${isFavori ? 'favori' : ''}`;
-                oyuncuDivi.setAttribute('data-id', oyuncu.id);
+                try {
+                    const rooms = await this.fetchRooms();
+                    if (rooms && rooms.length > 0) {
+                        this.updateConnectionStatus('connected');
+                        await this.processRooms(rooms);
+                        this.showAlert('success', `${rooms.length} oda bulundu, oyuncular yükleniyor...`);
+                    } else {
+                        this.showAlert('error', 'Hiç oda bulunamadı!');
+                        this.updateConnectionStatus('error');
+                    }
+                } catch (error) {
+                    console.error('Error loading rooms:', error);
+                    this.showAlert('error', 'Odalar yüklenirken hata oluştu!');
+                    this.updateConnectionStatus('error');
+                    this.connectionRetries++;
+                    
+                    if (this.connectionRetries < this.maxRetries) {
+                        setTimeout(() => this.loadRooms(), 2000);
+                    }
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async fetchRooms() {
+                const corsProxies = [
+                    'https://corsproxy.io/?',
+                    'https://api.allorigins.win/raw?url=',
+                    'https://cors-anywhere.herokuapp.com/'
+                ];
+
+                let lastError;
+                for (const proxy of corsProxies) {
+                    try {
+                        const url = `${proxy}${encodeURIComponent(`https://gartic.io/req/list?search=&language[]=${this.language}`)}`;
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        lastError = error;
+                        console.warn(`Proxy failed: ${proxy}`, error);
+                        continue;
+                    }
+                }
+
+                throw lastError || new Error('All proxies failed');
+            }
+
+            async processRooms(rooms) {
+                const activeRooms = rooms.filter(room => room.quant > 0);
+                this.updateStats({ totalRooms: activeRooms.length });
+
+                // Process rooms in batches for better performance
+                const batchSize = 6;
+                const batches = [];
                 
-                oyuncuDivi.innerHTML = `
-                    <div class="gg-heart ${isFavori ? 'activex' : ''}"></div>
-                    <img src="${avatarUrl}" alt="${oyuncu.nick}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="avatar-placeholder">${avatarPlaceholder}</div>
-                    <div class="oyuncu-text">
-                        <b>${oyuncu.nick}</b>
-                        <i>ID: ${oyuncu.id}</i>
-                        <span>${trans.room}: ${oyuncu.odasi.slice(18)}</span>
-                        <div class="linkler">
-                            <span class="oyuncu-link" onclick="openLink('${oyuncu.odasi}')">${trans.enter}</span>
-                            <span class="oyuncu-link" onclick="openLink('${oyuncu.odasi}/viewer')">${trans.watch}</span>
+                for (let i = 0; i < activeRooms.length; i += batchSize) {
+                    batches.push(activeRooms.slice(i, i + batchSize));
+                }
+
+                for (const batch of batches) {
+                    await Promise.all(batch.map(room => this.connectToRoom(room)));
+                    // Small delay between batches to avoid overwhelming
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                this.updateDebugInfo();
+            }
+
+            connectToRoom(room) {
+                return new Promise((resolve) => {
+                    const promises = [];
+                    
+                    // Try all servers (1-6)
+                    for (let serverNum = 1; serverNum <= 6; serverNum++) {
+                        promises.push(this.connectToServer(serverNum, room.code));
+                    }
+
+                    Promise.allSettled(promises).then(() => {
+                        resolve();
+                    });
+                });
+            }
+
+            connectToServer(serverNum, roomCode) {
+                return new Promise((resolve, reject) => {
+                    const wsUrl = `wss://server0${serverNum}.gartic.io/socket.io/?EIO=3&transport=websocket`;
+                    const ws = new WebSocket(wsUrl);
+                    const timeout = setTimeout(() => {
+                        ws.close();
+                        reject(new Error('Connection timeout'));
+                    }, 10000);
+
+                    this.wsConnections.push(ws);
+
+                    ws.onopen = () => {
+                        const joinMessage = `42[12,{"v":20000,"platform":0,"sala":"${roomCode.slice(-4)}"}]`;
+                        ws.send(joinMessage);
+                    };
+
+                    ws.onmessage = (event) => {
+                        try {
+                            if (event.data && event.data.length > 4 && event.data[4] === "5") {
+                                const data = JSON.parse(event.data.slice(2));
+                                if (data[0] === 5 && data[5]) {
+                                    data[5].forEach(player => {
+                                        const playerId = player.id.toString();
+                                        
+                                        // Avoid duplicates
+                                        if (!this.players.has(playerId)) {
+                                            this.players.set(playerId, {
+                                                id: playerId,
+                                                nick: player.nick || 'Unknown',
+                                                avatar: player.avatar || 0,
+                                                foto: player.foto || null,
+                                                pontos: player.pontos || 0,
+                                                vitorias: player.vitorias || 0,
+                                                roomCode: roomCode,
+                                                roomUrl: `https://gartic.io/${roomCode}`,
+                                                serverNum: serverNum
+                                            });
+                                            
+                                            // Update room info
+                                            if (!this.rooms.has(roomCode)) {
+                                                this.rooms.set(roomCode, {
+                                                    code: roomCode,
+                                                    players: new Set()
+                                                });
+                                            }
+                                            this.rooms.get(roomCode).players.add(playerId);
+                                        }
+                                    });
+                                    
+                                    this.renderPlayers();
+                                    this.updateStats();
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error parsing message:', error);
+                            this.errorCount++;
+                        }
+                    };
+
+                    ws.onerror = (error) => {
+                        console.error(`WebSocket error (server ${serverNum}):`, error);
+                        this.errorCount++;
+                        clearTimeout(timeout);
+                        reject(error);
+                    };
+
+                    ws.onclose = () => {
+                        clearTimeout(timeout);
+                        const index = this.wsConnections.indexOf(ws);
+                        if (index > -1) {
+                            this.wsConnections.splice(index, 1);
+                        }
+                        resolve();
+                    };
+                });
+            }
+
+            closeAllConnections() {
+                this.wsConnections.forEach(ws => {
+                    try {
+                        ws.close();
+                    } catch (e) {
+                        // Ignore errors
+                    }
+                });
+                this.wsConnections = [];
+            }
+
+            renderPlayers() {
+                const grid = document.getElementById('playersGrid');
+                const filteredPlayers = this.getFilteredPlayers();
+                
+                if (filteredPlayers.length === 0) {
+                    grid.innerHTML = '';
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('emptyState').style.display = 'none';
+                
+                // Virtual DOM approach for better performance
+                const fragment = document.createDocumentFragment();
+                const existingCards = new Map();
+                
+                // Store existing cards
+                grid.querySelectorAll('.player-card').forEach(card => {
+                    existingCards.set(card.dataset.playerId, card);
+                });
+                
+                filteredPlayers.forEach(player => {
+                    let card = existingCards.get(player.id);
+                    
+                    if (!card) {
+                        card = this.createPlayerCard(player);
+                    } else {
+                        // Update existing card if needed
+                        this.updatePlayerCard(card, player);
+                        existingCards.delete(player.id);
+                    }
+                    
+                    fragment.appendChild(card);
+                });
+                
+                // Remove cards that are no longer needed
+                existingCards.forEach(card => card.remove());
+                
+                // Clear and append new content
+                grid.innerHTML = '';
+                grid.appendChild(fragment);
+                
+                document.getElementById('onlineCount').textContent = filteredPlayers.length;
+            }
+
+            createPlayerCard(player) {
+                const card = document.createElement('div');
+                card.className = `player-card ${this.favorites.has(player.id) ? 'favorite' : ''}`;
+                card.dataset.playerId = player.id;
+                
+                const avatarUrl = player.foto || `https://gartic.io/static/images/avatar/svg/${player.avatar}.svg`;
+                const initials = this.getInitials(player.nick);
+                
+                card.innerHTML = `
+                    <div class="player-avatar-wrapper">
+                        ${player.foto ? 
+                            `<img class="player-avatar" src="${avatarUrl}" alt="${player.nick}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div class="avatar-placeholder" style="display:none;">${initials}</div>` :
+                            `<div class="avatar-placeholder">${initials}</div>`
+                        }
+                    </div>
+                    <div class="player-info">
+                        <div class="player-name" title="${player.nick}">${player.nick}</div>
+                        <div class="player-id">ID: ${player.id}</div>
+                        <div class="player-room">${this.getTranslation('room')}: ${player.roomCode.slice(-4)}</div>
+                        <div class="player-actions">
+                            <a href="${player.roomUrl}" target="_blank" class="action-button">${this.getTranslation('enter')}</a>
+                            <a href="${player.roomUrl}/viewer" target="_blank" class="action-button">${this.getTranslation('watch')}</a>
                         </div>
                     </div>
+                    <button class="favorite-button ${this.favorites.has(player.id) ? 'active' : ''}" data-player-id="${player.id}">
+                        <svg class="favorite-icon" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </button>
                 `;
                 
-                document.querySelector(".kullanicilar").appendChild(oyuncuDivi);
-            });
-
-            document.getElementById("online").querySelector("b").textContent = filteredPlayers.length;
-
-            // Add heart click handlers
-            document.querySelectorAll('.gg-heart').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const oyuncuDiv = e.target.closest('.oyuncu');
-                    const oyuncuId = oyuncuDiv.getAttribute('data-id');
-                    if (favoriler.includes(oyuncuId)) {
-                        favoriler = favoriler.filter(id => id !== oyuncuId);
-                        e.target.classList.remove('activex');
-                        oyuncuDiv.classList.remove('favori');
-                    } else {
-                        favoriler.push(oyuncuId);
-                        e.target.classList.add('activex');
-                        oyuncuDiv.classList.add('favori');
-                    }
-                    safeStorage.setItem('favoriler', JSON.stringify(favoriler));
-                    kullanicilariGuncelle();
+                // Add event listener for favorite button
+                const favoriteBtn = card.querySelector('.favorite-button');
+                favoriteBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleFavorite(player.id);
                 });
-            });
-        }
-
-        function sunucuKontrol(sunucuNo, odaKodu) {
-            let ws = new WebSocket(`wss://server0${sunucuNo}.gartic.io/socket.io/?EIO=3&transport=websocket`);
-            ws.onopen = () => ws.send(`42[12,{"v":20000,"platform":0,"sala":"${odaKodu.slice(-4)}"}]`);
-            ws.onmessage = (mesaj) => {
-                if (mesaj.data[4] == "5") {
-                    let veri = JSON.parse(mesaj.data.slice(2));
-                    if (veri[0] == 5) {
-                        veri[5].forEach(oyuncu => {
-                            oyuncular.push({
-                                "puan": oyuncu.pontos,
-                                "zafer": oyuncu.vitorias,
-                                "id": oyuncu.id.toString(),
-                                "avatar": oyuncu.avatar,
-                                "odasi": `https://gartic.io/${odaKodu}`,
-                                "nick": oyuncu.nick,
-                                "foto": oyuncu.foto
-                            });
-                        });
-                        kullanicilariGuncelle();
-                        ws.close();
-                    }
-                }
-            }
-            ws.onerror = () => {
-                ws.close();
-            }
-        }
-
-        function veriCek(odaKodu) {
-            for (let i = 1; i <= 6; i++) {
-                sunucuKontrol(i, odaKodu);
-            }
-        }
-
-        async function fetchWithCors(url, retryCount = 0) {
-            try {
-                showLoading(true);
-                const proxyUrl = getCorsProxyUrl(url);
-                const response = await fetch(proxyUrl);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                return card;
+            }
+
+            updatePlayerCard(card, player) {
+                // Update only if necessary
+                const nameEl = card.querySelector('.player-name');
+                if (nameEl.textContent !== player.nick) {
+                    nameEl.textContent = player.nick;
+                    nameEl.title = player.nick;
                 }
                 
-                showLoading(false);
-                return await response.json();
-            } catch (error) {
-                showLoading(false);
-                console.error('Fetch error:', error);
+                const favoriteBtn = card.querySelector('.favorite-button');
+                const isFavorite = this.favorites.has(player.id);
+                card.classList.toggle('favorite', isFavorite);
+                favoriteBtn.classList.toggle('active', isFavorite);
+            }
+
+            getFilteredPlayers() {
+                let players = Array.from(this.players.values());
                 
-                // Try next proxy if available
-                if (retryCount < CORS_PROXIES.length - 1) {
-                    currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
-                    return fetchWithCors(url, retryCount + 1);
+                // Apply filters
+                if (this.filters.withPhoto) {
+                    players = players.filter(p => p.foto);
                 }
                 
-                showError('Veri alınırken bir hata oluştu. Lütfen tekrar deneyin.');
-                throw error;
-            }
-        }
-
-        async function loadRooms() {
-            try {
-                const veri = await fetchWithCors(`https://gartic.io/req/list?search=&language[]=${window.lang}`);
-                oyuncular = [];
-                veri.forEach(oda => {
-                    if (oda.quant > 0) {
-                        veriCek(oda.code);
-                    }
+                if (this.filters.withoutPhoto) {
+                    players = players.filter(p => !p.foto);
+                }
+                
+                if (this.filters.hideUsers) {
+                    players = players.filter(p => !p.nick.toLowerCase().includes('user'));
+                }
+                
+                if (this.filters.showFavorites) {
+                    players = players.filter(p => this.favorites.has(p.id));
+                }
+                
+                // Apply search
+                if (this.searchTerm) {
+                    players = players.filter(p => 
+                        p.nick.toLowerCase().includes(this.searchTerm) ||
+                        p.id.includes(this.searchTerm)
+                    );
+                }
+                
+                // Sort: favorites first, then by name
+                players.sort((a, b) => {
+                    const aFav = this.favorites.has(a.id);
+                    const bFav = this.favorites.has(b.id);
+                    if (aFav && !bFav) return -1;
+                    if (!aFav && bFav) return 1;
+                    return a.nick.localeCompare(b.nick);
                 });
-            } catch (error) {
-                console.error('Load rooms error:', error);
+                
+                return players;
+            }
+
+            toggleFavorite(playerId) {
+                if (this.favorites.has(playerId)) {
+                    this.favorites.delete(playerId);
+                } else {
+                    this.favorites.add(playerId);
+                }
+                
+                this.setStorage('favorites', JSON.stringify(Array.from(this.favorites)));
+                this.renderPlayers();
+                this.updateStats();
+            }
+
+            getInitials(name) {
+                if (!name) return '?';
+                return name
+                    .split(' ')
+                    .map(word => word.charAt(0))
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase() || name.charAt(0).toUpperCase();
+            }
+
+            updateStats(additionalStats = {}) {
+                document.getElementById('totalPlayers').textContent = this.players.size;
+                document.getElementById('totalRooms').textContent = additionalStats.totalRooms || this.rooms.size;
+                document.getElementById('favoriteCount').textContent = this.favorites.size;
+            }
+
+            updateConnectionStatus(status) {
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('connectionText');
+                
+                switch(status) {
+                    case 'connected':
+                        dot.classList.remove('error');
+                        text.textContent = 'Bağlı';
+                        break;
+                    case 'loading':
+                        dot.classList.remove('error');
+                        text.textContent = 'Bağlanıyor...';
+                        break;
+                    case 'error':
+                        dot.classList.add('error');
+                        text.textContent = 'Bağlantı hatası';
+                        break;
+                }
+            }
+
+            showAlert(type, message) {
+                const container = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                
+                container.appendChild(alert);
+                alert.style.display = 'block';
+                
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                }, 3000);
+            }
+
+            showLoading(show) {
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.toggle('show', show);
+                
+                const refreshBtn = document.getElementById('refreshButton');
+                refreshBtn.classList.toggle('loading', show);
+                refreshBtn.disabled = show;
+            }
+
+            updateUILanguage() {
+                const trans = this.getTranslations();
+                document.getElementById('searchInput').placeholder = trans.search + '...';
+                
+                // Update filter labels
+                document.querySelector('label[for="withPhoto"] span').textContent = '📷 ' + trans.photo;
+                document.querySelector('label[for="withoutPhoto"] span').textContent = '👤 ' + trans.noPhoto;
+                document.querySelector('label[for="hideUsers"] span').textContent = '🚫 ' + trans.hideUser;
+                document.querySelector('label[for="showFavorites"] span').textContent = '⭐ ' + trans.favorites;
+                
+                this.renderPlayers();
+            }
+
+            getTranslations() {
+                const translations = {
+                    '0': { search: 'Search user', photo: 'With photo', noPhoto: 'Without photo', hideUser: 'Hide User', favorites: 'Favorites', enter: 'ENTER', watch: 'WATCH', room: 'ROOM' },
+                    '1': { search: 'Buscar usuário', photo: 'Com foto', noPhoto: 'Sem foto', hideUser: 'Ocultar User', favorites: 'Favoritos', enter: 'ENTRAR', watch: 'ASSISTIR', room: 'SALA' },
+                    '2': { search: 'Buscar usuario', photo: 'Con foto', noPhoto: 'Sin foto', hideUser: 'Ocultar User', favorites: 'Favoritos', enter: 'ENTRAR', watch: 'VER', room: 'SALA' },
+                    '3': { search: 'Rechercher', photo: 'Avec photo', noPhoto: 'Sans photo', hideUser: 'Masquer User', favorites: 'Favoris', enter: 'ENTRER', watch: 'REGARDER', room: 'SALLE' },
+                    '4': { search: 'Benutzer suchen', photo: 'Mit Foto', noPhoto: 'Ohne Foto', hideUser: 'User ausblenden', favorites: 'Favoriten', enter: 'BETRETEN', watch: 'ZUSEHEN', room: 'RAUM' },
+                    '5': { search: 'Cerca utente', photo: 'Con foto', noPhoto: 'Senza foto', hideUser: 'Nascondi User', favorites: 'Preferiti', enter: 'ENTRA', watch: 'GUARDA', room: 'STANZA' },
+                    '6': { search: 'Поиск', photo: 'С фото', noPhoto: 'Без фото', hideUser: 'Скрыть User', favorites: 'Избранное', enter: 'ВОЙТИ', watch: 'СМОТРЕТЬ', room: 'КОМНАТА' },
+                    '7': { search: 'Szukaj', photo: 'Ze zdjęciem', noPhoto: 'Bez zdjęcia', hideUser: 'Ukryj User', favorites: 'Ulubione', enter: 'WEJDŹ', watch: 'OGLĄDAJ', room: 'POKÓJ' },
+                    '8': { search: 'Kullanıcı ara', photo: 'Fotoğraflı', noPhoto: 'Fotoğrafsız', hideUser: 'User Gizle', favorites: 'Favoriler', enter: 'GİR', watch: 'İZLE', room: 'ODA' },
+                    '9': { search: 'Zoek gebruiker', photo: 'Met foto', noPhoto: 'Zonder foto', hideUser: 'Verberg User', favorites: 'Favorieten', enter: 'BETREDEN', watch: 'KIJKEN', room: 'KAMER' },
+                    '10': { search: 'ユーザー検索', photo: '写真あり', noPhoto: '写真なし', hideUser: 'User非表示', favorites: 'お気に入り', enter: '入室', watch: '観戦', room: '部屋' },
+                    '11': { search: '搜索用户', photo: '有照片', noPhoto: '无照片', hideUser: '隐藏User', favorites: '收藏', enter: '进入', watch: '观看', room: '房间' },
+                    '12': { search: '사용자 검색', photo: '사진 있음', noPhoto: '사진 없음', hideUser: 'User 숨기기', favorites: '즐겨찾기', enter: '입장', watch: '관전', room: '방' },
+                    '13': { search: 'Cari pengguna', photo: 'Dengan foto', noPhoto: 'Tanpa foto', hideUser: 'Sembunyikan User', favorites: 'Favorit', enter: 'MASUK', watch: 'TONTON', room: 'RUANG' },
+                    '14': { search: 'Hanapin', photo: 'May litrato', noPhoto: 'Walang litrato', hideUser: 'Itago User', favorites: 'Paborito', enter: 'PUMASOK', watch: 'PANOORIN', room: 'SILID' },
+                    '15': { search: 'खोजें', photo: 'फोटो के साथ', noPhoto: 'फोटो के बिना', hideUser: 'User छुपाएं', favorites: 'पसंदीदा', enter: 'प्रवेश', watch: 'देखें', room: 'कमरा' },
+                    '16': { search: 'Sök användare', photo: 'Med foto', noPhoto: 'Utan foto', hideUser: 'Dölj User', favorites: 'Favoriter', enter: 'GÅ IN', watch: 'TITTA', room: 'RUM' },
+                    '17': { search: 'Hledat', photo: 'S fotkou', noPhoto: 'Bez fotky', hideUser: 'Skrýt User', favorites: 'Oblíbené', enter: 'VSTOUPIT', watch: 'SLEDOVAT', room: 'MÍSTNOST' },
+                    '18': { search: 'Keresés', photo: 'Fényképpel', noPhoto: 'Fénykép nélkül', hideUser: 'User elrejtése', favorites: 'Kedvencek', enter: 'BELÉPÉS', watch: 'NÉZÉS', room: 'SZOBA' },
+                    '19': { search: 'Caută', photo: 'Cu poză', noPhoto: 'Fără poză', hideUser: 'Ascunde User', favorites: 'Favorite', enter: 'INTRĂ', watch: 'URMĂREȘTE', room: 'CAMERĂ' },
+                    '20': { search: 'Търсене', photo: 'Със снимка', noPhoto: 'Без снимка', hideUser: 'Скрий User', favorites: 'Любими', enter: 'ВЛЕЗ', watch: 'ГЛЕДАЙ', room: 'СТАЯ' },
+                    '21': { search: 'بحث', photo: 'مع صورة', noPhoto: 'بدون صورة', hideUser: 'إخفاء User', favorites: 'المفضلة', enter: 'دخول', watch: 'مشاهدة', room: 'غرفة' }
+                };
+                
+                return translations[this.language] || translations['8'];
+            }
+
+            getTranslation(key) {
+                const translations = this.getTranslations();
+                return translations[key] || key;
+            }
+
+            toggleDebugMode() {
+                this.debugMode = !this.debugMode;
+                const panel = document.getElementById('debugPanel');
+                panel.classList.toggle('show', this.debugMode);
+                
+                if (this.debugMode) {
+                    this.updateDebugInfo();
+                    this.debugInterval = setInterval(() => this.updateDebugInfo(), 1000);
+                } else {
+                    clearInterval(this.debugInterval);
+                }
+            }
+
+            updateDebugInfo() {
+                if (!this.debugMode) return;
+                
+                document.getElementById('wsStatus').textContent = this.wsConnections.length > 0 ? 'Active' : 'Idle';
+                document.getElementById('wsConnections').textContent = this.wsConnections.length;
+                document.getElementById('collectedPlayers').textContent = this.players.size;
+                document.getElementById('errorCount').textContent = this.errorCount;
+            }
+
+            // Storage helpers with fallback
+            getStorage(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    return this.memoryStorage?.[key] || null;
+                }
+            }
+
+            setStorage(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                } catch (e) {
+                    if (!this.memoryStorage) this.memoryStorage = {};
+                    this.memoryStorage[key] = value;
+                }
             }
         }
 
-        // Initial load
-        loadRooms();
-
-        document.getElementById("searchInput").addEventListener("input", kullanicilariGuncelle);
-        document.getElementById("yenile").addEventListener("click", () => {
-            loadRooms();
+        // Initialize application
+        const app = new GarticWhoWhere();
+        
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            if (!document.hidden) {
+                app.loadRooms();
+            }
+        }, 5 * 60 * 1000);
+        
+        // Visibility change handler
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && Date.now() - app.lastRefresh > 60000) {
+                app.loadRooms();
+            }
         });
-
-        const filters = ['fotografli', 'fotografsiz', 'userlar', 'favoriler'];
-        filters.forEach(filter => {
-            document.getElementById(filter).addEventListener('change', (e) => {
-                filtreler[filter] = e.target.checked;
-                const key = filter === 'favoriler' ? 'favorilerGoster' : filter;
-                safeStorage.setItem(key, e.target.checked);
-                setTimeout(kullanicilariGuncelle, 15);
-            });
-        });
-
-        // Language selection handler
-        document.getElementById('languageSelect').addEventListener('change', (e) => {
-            window.lang = e.target.value;
-            safeStorage.setItem('selectedLanguage', window.lang);
-            
-            // Update UI texts based on selected language
-            updateUILanguage();
-            
-            // Reload rooms with new language
-            loadRooms();
-        });
-
-        // UI language translations
-        const translations = {
-            '0': { search: 'Search user', photo: 'With photo', noPhoto: 'Without photo', hideUser: 'Hide User', favorites: 'Favorites', enter: 'ENTER ROOM', watch: 'WATCH', loading: 'Loading...', room: 'ROOM' },
-            '1': { search: 'Buscar usuário', photo: 'Com foto', noPhoto: 'Sem foto', hideUser: 'Ocultar User', favorites: 'Favoritos', enter: 'ENTRAR', watch: 'ASSISTIR', loading: 'Carregando...', room: 'SALA' },
-            '2': { search: 'Buscar usuario', photo: 'Con foto', noPhoto: 'Sin foto', hideUser: 'Ocultar User', favorites: 'Favoritos', enter: 'ENTRAR', watch: 'VER', loading: 'Cargando...', room: 'SALA' },
-            '3': { search: 'Rechercher', photo: 'Avec photo', noPhoto: 'Sans photo', hideUser: 'Masquer User', favorites: 'Favoris', enter: 'ENTRER', watch: 'REGARDER', loading: 'Chargement...', room: 'SALLE' },
-            '4': { search: 'Benutzer suchen', photo: 'Mit Foto', noPhoto: 'Ohne Foto', hideUser: 'User ausblenden', favorites: 'Favoriten', enter: 'BETRETEN', watch: 'ZUSEHEN', loading: 'Wird geladen...', room: 'RAUM' },
-            '5': { search: 'Cerca utente', photo: 'Con foto', noPhoto: 'Senza foto', hideUser: 'Nascondi User', favorites: 'Preferiti', enter: 'ENTRA', watch: 'GUARDA', loading: 'Caricamento...', room: 'STANZA' },
-            '6': { search: 'Поиск', photo: 'С фото', noPhoto: 'Без фото', hideUser: 'Скрыть User', favorites: 'Избранное', enter: 'ВОЙТИ', watch: 'СМОТРЕТЬ', loading: 'Загрузка...', room: 'КОМНАТА' },
-            '7': { search: 'Szukaj', photo: 'Ze zdjęciem', noPhoto: 'Bez zdjęcia', hideUser: 'Ukryj User', favorites: 'Ulubione', enter: 'WEJDŹ', watch: 'OGLĄDAJ', loading: 'Ładowanie...', room: 'POKÓJ' },
-            '8': { search: 'Kullanıcı ara', photo: 'Fotoğraflı', noPhoto: 'Fotoğrafsız', hideUser: 'User Gizle', favorites: 'Favoriler', enter: 'ODAYA GİR', watch: 'İZLE', loading: 'Yükleniyor...', room: 'ODA' },
-            '9': { search: 'Zoek gebruiker', photo: 'Met foto', noPhoto: 'Zonder foto', hideUser: 'Verberg User', favorites: 'Favorieten', enter: 'BETREDEN', watch: 'KIJKEN', loading: 'Laden...', room: 'KAMER' },
-            '10': { search: 'ユーザー検索', photo: '写真あり', noPhoto: '写真なし', hideUser: 'User非表示', favorites: 'お気に入り', enter: '入室', watch: '観戦', loading: '読み込み中...', room: '部屋' },
-            '11': { search: '搜索用户', photo: '有照片', noPhoto: '无照片', hideUser: '隐藏User', favorites: '收藏', enter: '进入房间', watch: '观看', loading: '加载中...', room: '房间' },
-            '12': { search: '사용자 검색', photo: '사진 있음', noPhoto: '사진 없음', hideUser: 'User 숨기기', favorites: '즐겨찾기', enter: '입장', watch: '관전', loading: '로딩 중...', room: '방' },
-            '13': { search: 'Cari pengguna', photo: 'Dengan foto', noPhoto: 'Tanpa foto', hideUser: 'Sembunyikan User', favorites: 'Favorit', enter: 'MASUK', watch: 'TONTON', loading: 'Memuat...', room: 'RUANG' },
-            '14': { search: 'Hanapin', photo: 'May litrato', noPhoto: 'Walang litrato', hideUser: 'Itago User', favorites: 'Paborito', enter: 'PUMASOK', watch: 'PANOORIN', loading: 'Nag-load...', room: 'SILID' },
-            '15': { search: 'खोजें', photo: 'फोटो के साथ', noPhoto: 'फोटो के बिना', hideUser: 'User छुपाएं', favorites: 'पसंदीदा', enter: 'प्रवेश', watch: 'देखें', loading: 'लोड हो रहा है...', room: 'कमरा' },
-            '16': { search: 'Sök användare', photo: 'Med foto', noPhoto: 'Utan foto', hideUser: 'Dölj User', favorites: 'Favoriter', enter: 'GÅ IN', watch: 'TITTA', loading: 'Laddar...', room: 'RUM' },
-            '17': { search: 'Hledat', photo: 'S fotkou', noPhoto: 'Bez fotky', hideUser: 'Skrýt User', favorites: 'Oblíbené', enter: 'VSTOUPIT', watch: 'SLEDOVAT', loading: 'Načítání...', room: 'MÍSTNOST' },
-            '18': { search: 'Keresés', photo: 'Fényképpel', noPhoto: 'Fénykép nélkül', hideUser: 'User elrejtése', favorites: 'Kedvencek', enter: 'BELÉPÉS', watch: 'NÉZÉS', loading: 'Betöltés...', room: 'SZOBA' },
-            '19': { search: 'Caută', photo: 'Cu poză', noPhoto: 'Fără poză', hideUser: 'Ascunde User', favorites: 'Favorite', enter: 'INTRĂ', watch: 'URMĂREȘTE', loading: 'Se încarcă...', room: 'CAMERĂ' },
-            '20': { search: 'Търсене', photo: 'Със снимка', noPhoto: 'Без снимка', hideUser: 'Скрий User', favorites: 'Любими', enter: 'ВЛЕЗ', watch: 'ГЛЕДАЙ', loading: 'Зареждане...', room: 'СТАЯ' },
-            '21': { search: 'بحث', photo: 'مع صورة', noPhoto: 'بدون صورة', hideUser: 'إخفاء User', favorites: 'المفضلة', enter: 'دخول', watch: 'مشاهدة', loading: 'جار التحميل...', room: 'غرفة' }
-        };
-
-        function updateUILanguage() {
-            const lang = window.lang;
-            const trans = translations[lang] || translations['8'];
-            
-            document.getElementById('searchInput').placeholder = trans.search;
-            document.querySelector('label[for="fotografli"]').childNodes[1].textContent = ' ' + trans.photo;
-            document.querySelector('label[for="fotografsiz"]').childNodes[1].textContent = ' ' + trans.noPhoto;
-            document.querySelector('label[for="userlar"]').childNodes[1].textContent = ' ' + trans.hideUser;
-            document.querySelector('label[for="favoriler"]').childNodes[1].textContent = ' ' + trans.favorites;
-            document.getElementById('loadingMessage').textContent = trans.loading;
-            
-            // Store translations for dynamic content
-            window.currentTranslations = trans;
-        }
-
-        // Initialize UI language
-        updateUILanguage();
     </script>
 </body>
 </html>
