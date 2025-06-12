@@ -729,6 +729,8 @@
                 this.errorCount = 0;
                 this.connectionRetries = 0;
                 this.maxRetries = 3;
+                this.lastRefresh = Date.now();
+                this.memoryStorage = {};
                 
                 this.initializeApp();
             }
@@ -736,7 +738,8 @@
             initializeApp() {
                 this.loadSettings();
                 this.initializeEventListeners();
-                this.updateUI();
+                this.updateUILanguage();
+                this.updateStats();
                 this.loadRooms();
                 
                 // Debug mode toggle
@@ -834,6 +837,7 @@
                 this.showLoading(true);
                 this.showAlert('info', 'Odalar yükleniyor...');
                 this.updateConnectionStatus('loading');
+                this.lastRefresh = Date.now();
                 
                 // Clear previous data
                 this.closeAllConnections();
