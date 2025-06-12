@@ -20,6 +20,12 @@
             --filter-border: #2c279a;
             --gradient-start: rgba(17, 22, 32, 1);
             --gradient-end: rgba(38, 55, 89, 1);
+        body.loading * {
+            pointer-events: none !important;
+        }
+
+        body.loading .refresh-button {
+            pointer-events: all !important;
         }
 
         * {
@@ -97,6 +103,23 @@
                 transform: translateY(-20px);
                 opacity: 0;
             }
+
+            async addRoom(roomCode) {
+                console.log(`Adding room: ${roomCode}`);
+                this.showAlert('info', `Oda ekleniyor: ${roomCode}`);
+                try {
+                    await this.connectToRoom({ code: roomCode.toUpperCase(), quant: 1 });
+                    
+                    if (this.players.size > 0) {
+                        this.showAlert('success', `Oda eklendi: ${roomCode} (${this.players.size} oyuncu)`);
+                    } else {
+                        this.showAlert('warning', `Oda boş görünüyor: ${roomCode}`);
+                    }
+                } catch (error) {
+                    this.showAlert('error', `Oda eklenemedi: ${roomCode}`);
+                    console.error('Failed to add room:', error);
+                }
+            }
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -116,6 +139,11 @@
         .alert-info {
             background: linear-gradient(135deg, #24ccff, #0099dd);
             border-left: 4px solid #0077bb;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            border-left: 4px solid #ff6600;
         }
 
         .controls-section {
@@ -731,6 +759,7 @@
                 this.maxRetries = 3;
                 this.lastRefresh = Date.now();
                 this.memoryStorage = {};
+                this.customProxy = null;
                 
                 this.initializeApp();
             }
@@ -748,6 +777,25 @@
                         this.toggleDebugMode();
                     }
                 });
+                
+                // Make app globally accessible for debugging
+                window.garticApp = this;
+                console.log('%cGartic WHOWHERE loaded!', 'color: #24ccff; font-size: 16px; font-weight: bold');
+                console.log('%cDebug Commands:', 'color: #00d4aa; font-weight: bold');
+                console.log('• garticApp.addRoom("ROOMCODE") - Add a specific room');
+                console.log('• garticApp.tryKnownRooms() - Try common room patterns');
+                console.log('• garticApp.players - View all players');
+                console.log('• garticApp.rooms - View all rooms');
+                console.log('• garticApp.toggleDebugMode() - Toggle debug panel (or Ctrl+Shift+D)');
+                console.log('• garticApp.loadRooms() - Reload all rooms');
+                console.log('• garticApp.setProxy("https://your-proxy.com/") - Use custom proxy');
+                console.log('%cNote: If API fails, the app will automatically try common room patterns', 'color: #ffaa00; font-style: italic');
+            }
+            
+            setProxy(proxyUrl) {
+                this.customProxy = proxyUrl;
+                console.log(`Custom proxy set to: ${proxyUrl}`);
+                this.loadRooms();
             }
 
             loadSettings() {
@@ -853,17 +901,36 @@
                         await this.processRooms(rooms);
                         this.showAlert('success', `${rooms.length} oda bulundu, oyuncular yükleniyor...`);
                     } else {
-                        this.showAlert('error', 'Hiç oda bulunamadı!');
-                        this.updateConnectionStatus('error');
+                        // If no rooms from API, try fallback
+                        console.log('No rooms from API, trying fallback...');
+                        this.showAlert('info', 'API başarısız, bilinen odalar deneniyor...');
+                        await this.tryKnownRooms();
+                        
+                        if (this.players.size > 0) {
+                            this.updateConnectionStatus('connected');
+                            this.showAlert('success', `${this.players.size} oyuncu bulundu!`);
+                        } else {
+                            throw new Error('No players found');
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading rooms:', error);
-                    this.showAlert('error', 'Odalar yüklenirken hata oluştu!');
-                    this.updateConnectionStatus('error');
-                    this.connectionRetries++;
                     
-                    if (this.connectionRetries < this.maxRetries) {
-                        setTimeout(() => this.loadRooms(), 2000);
+                    // Fallback: Try known room codes
+                    this.showAlert('info', 'Proxy başarısız, bilinen odalar deneniyor...');
+                    await this.tryKnownRooms();
+                    
+                    if (this.players.size > 0) {
+                        this.updateConnectionStatus('connected');
+                        this.showAlert('success', `${this.players.size} oyuncu bulundu!`);
+                    } else {
+                        this.showAlert('error', 'Odalar yüklenirken hata oluştu!');
+                        this.updateConnectionStatus('error');
+                        this.connectionRetries++;
+                        
+                        if (this.connectionRetries < this.maxRetries) {
+                            setTimeout(() => this.loadRooms(), 2000);
+                        }
                     }
                 } finally {
                     this.showLoading(false);
@@ -872,36 +939,178 @@
 
             async fetchRooms() {
                 const corsProxies = [
-                    'https://corsproxy.io/?',
-                    'https://api.allorigins.win/raw?url=',
-                    'https://cors-anywhere.herokuapp.com/'
+                    {
+                        name: 'AllOrigins',
+                        url: (target) => `https://api.allorigins.win/get?url=${encodeURIComponent(target)}`,
+                        extractData: (response) => JSON.parse(response.contents)
+                    },
+                    {
+                        name: 'AllOrigins Raw',
+                        url: (target) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'Proxy.cors.sh',
+                        url: (target) => `https://proxy.cors.sh/${target}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'ThingProxy',
+                        url: (target) => `https://thingproxy.freeboard.io/fetch/${target}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'CodeTabs',
+                        url: (target) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'CorsAnywhere (demo)',
+                        url: (target) => `https://cors-anywhere.herokuapp.com/${target}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'CorsProxy.io',
+                        url: (target) => `https://corsproxy.io/?${encodeURIComponent(target)}`,
+                        extractData: (response) => response
+                    },
+                    {
+                        name: 'NoCors',
+                        url: (target) => `https://api.nocors.click/v1/fetch?url=${encodeURIComponent(target)}`,
+                        extractData: (response) => response
+                    }
                 ];
+                
+                // Add custom proxy if available
+                if (this.customProxy) {
+                    corsProxies.unshift({
+                        name: 'Custom Proxy',
+                        url: (target) => `${this.customProxy}${encodeURIComponent(target)}`,
+                        extractData: (response) => response
+                    });
+                }
 
+                const targetUrl = `https://gartic.io/req/list?search=&language[]=${this.language}`;
+                
+                console.log(`Fetching rooms for language: ${this.language}`);
+                console.log(`Target URL: ${targetUrl}`);
+                
                 let lastError;
-                for (const proxy of corsProxies) {
+                
+                // First, try the most reliable proxies
+                const reliableProxies = corsProxies.slice(0, 4);
+                
+                for (const proxy of reliableProxies) {
                     try {
-                        const url = `${proxy}${encodeURIComponent(`https://gartic.io/req/list?search=&language[]=${this.language}`)}`;
-                        const response = await fetch(url, {
+                        const proxyUrl = proxy.url(targetUrl);
+                        console.log(`Trying ${proxy.name}...`);
+                        
+                        const response = await fetch(proxyUrl, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json',
-                            }
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                            },
+                            mode: 'cors'
                         });
 
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
-                        const data = await response.json();
-                        return data;
+                        const responseData = await response.json();
+                        const data = proxy.extractData(responseData);
+                        
+                        if (Array.isArray(data)) {
+                            console.log(`${proxy.name} succeeded! Found ${data.length} rooms`);
+                            return data;
+                        } else {
+                            throw new Error('Invalid data format');
+                        }
                     } catch (error) {
                         lastError = error;
-                        console.warn(`Proxy failed: ${proxy}`, error);
+                        console.warn(`${proxy.name} failed:`, error.message);
                         continue;
                     }
                 }
 
-                throw lastError || new Error('All proxies failed');
+                // If reliable proxies fail, return empty array to trigger fallback
+                console.warn('All proxies failed, will use fallback room search');
+                return [];
+            }
+
+            async tryKnownRooms() {
+                // Common room patterns for Gartic.io - mix of letters and numbers
+                const roomPatterns = [];
+                
+                // Common Turkish words/names
+                const turkishPatterns = ['TURK', 'ADAM', 'KRAL', 'OYUN', 'CIZIM', 'SANAT', 'GRUP', 'TAKM', 'DOST'];
+                
+                // Common English words
+                const commonWords = ['GAME', 'PLAY', 'DRAW', 'ARTS', 'LOVE', 'COOL', 'BEST', 'FREE', 'NICE', 'GOOD', 
+                                   'TEAM', 'CHAT', 'ROOM', 'JOIN', 'HERE', 'COME', 'LETS', 'HAVE', 'MAKE', 'TAKE'];
+                
+                // Number patterns
+                const numbers = ['1234', '2345', '3456', '4567', '5678', '6789', '7890', '1111', '2222', '3333',
+                               '4444', '5555', '6666', '7777', '8888', '9999', '0000', '1337', '6969', '4200'];
+                
+                // Letter patterns
+                const letters = ['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'ABCD', 'EFGH'];
+                
+                // Mix them up
+                roomPatterns.push(...turkishPatterns, ...commonWords, ...numbers, ...letters);
+                
+                // Add some 3-letter + 1 number patterns
+                const shortWords = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'STU', 'VWX', 'YZA'];
+                shortWords.forEach(word => {
+                    for (let i = 0; i < 10; i++) {
+                        roomPatterns.push(word + i);
+                    }
+                });
+                
+                // Generate some random 4-char combinations
+                for (let i = 0; i < 20; i++) {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let code = '';
+                    for (let j = 0; j < 4; j++) {
+                        code += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    roomPatterns.push(code);
+                }
+                
+                // Remove duplicates
+                const uniquePatterns = [...new Set(roomPatterns)];
+                
+                console.log(`Trying ${uniquePatterns.length} known room patterns...`);
+                
+                // Try rooms in batches
+                const batchSize = 8;
+                for (let i = 0; i < uniquePatterns.length; i += batchSize) {
+                    const batch = uniquePatterns.slice(i, i + batchSize);
+                    
+                    await Promise.all(batch.map(async (pattern) => {
+                        try {
+                            await this.connectToRoom({ code: pattern, quant: 1 });
+                        } catch (error) {
+                            // Ignore errors for individual rooms
+                        }
+                    }));
+                    
+                    // Update UI to show progress
+                    if (this.players.size > 0) {
+                        this.renderPlayers();
+                        this.updateStats();
+                    }
+                    
+                    // Check if we found enough players
+                    if (this.players.size > 50) {
+                        console.log('Found enough players, stopping search');
+                        break;
+                    }
+                    
+                    // Small delay between batches
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
             }
 
             async processRooms(rooms) {
@@ -943,8 +1152,11 @@
             connectToServer(serverNum, roomCode) {
                 return new Promise((resolve, reject) => {
                     const wsUrl = `wss://server0${serverNum}.gartic.io/socket.io/?EIO=3&transport=websocket`;
+                    console.log(`Connecting to server ${serverNum} for room ${roomCode}...`);
+                    
                     const ws = new WebSocket(wsUrl);
                     const timeout = setTimeout(() => {
+                        console.warn(`Server ${serverNum} timeout for room ${roomCode}`);
                         ws.close();
                         reject(new Error('Connection timeout'));
                     }, 10000);
@@ -952,7 +1164,8 @@
                     this.wsConnections.push(ws);
 
                     ws.onopen = () => {
-                        const joinMessage = `42[12,{"v":20000,"platform":0,"sala":"${roomCode.slice(-4)}"}]`;
+                        console.log(`Connected to server ${serverNum}`);
+                        const joinMessage = `42[12,{"v":20000,"platform":0,"sala":"${roomCode}"}]`;
                         ws.send(joinMessage);
                     };
 
@@ -961,6 +1174,8 @@
                             if (event.data && event.data.length > 4 && event.data[4] === "5") {
                                 const data = JSON.parse(event.data.slice(2));
                                 if (data[0] === 5 && data[5]) {
+                                    console.log(`Server ${serverNum} returned ${data[5].length} players for room ${roomCode}`);
+                                    
                                     data[5].forEach(player => {
                                         const playerId = player.id.toString();
                                         
@@ -994,7 +1209,7 @@
                                 }
                             }
                         } catch (error) {
-                            console.error('Error parsing message:', error);
+                            console.error(`Error parsing message from server ${serverNum}:`, error);
                             this.errorCount++;
                         }
                     };
@@ -1092,7 +1307,7 @@
                     <div class="player-info">
                         <div class="player-name" title="${player.nick}">${player.nick}</div>
                         <div class="player-id">ID: ${player.id}</div>
-                        <div class="player-room">${this.getTranslation('room')}: ${player.roomCode.slice(-4)}</div>
+                        <div class="player-room">${this.getTranslation('room')}: ${player.roomCode} (S${player.serverNum})</div>
                         <div class="player-actions">
                             <a href="${player.roomUrl}" target="_blank" class="action-button">${this.getTranslation('enter')}</a>
                             <a href="${player.roomUrl}/viewer" target="_blank" class="action-button">${this.getTranslation('watch')}</a>
@@ -1219,6 +1434,11 @@
 
             showAlert(type, message) {
                 const container = document.getElementById('alertContainer');
+                
+                // Remove old alerts of the same type
+                const existingAlerts = container.querySelectorAll(`.alert-${type}`);
+                existingAlerts.forEach(alert => alert.remove());
+                
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
                 alert.textContent = message;
